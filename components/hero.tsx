@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -12,8 +12,10 @@ import {
   FRAME_COUNT,
   FRAME_H,
   FRAME_W,
+  type FrameSequence,
   POSTER_TOP,
   POSTER_W,
+  shownWidth,
 } from "./burger-frames";
 import classic from "@/public/burgers/classic.webp";
 import signature from "@/public/burgers/signature.webp";
@@ -34,13 +36,11 @@ function Photo({
   src,
   alt,
   depth = "back",
-  priority,
 }: {
   className: string;
   src: StaticImageData;
   alt: string;
   depth?: "front" | "back";
-  priority?: boolean;
 }) {
   // Depth is carried by three things at once: size, a softer shadow, and a
   // little less light on the ones set back.
@@ -55,7 +55,13 @@ function Photo({
           src={src}
           alt={alt}
           sizes="(max-width: 520px) 60vw, 320px"
-          priority={priority}
+          // The entrance parks these at x: +/-90vw before first paint, so a
+          // lazy image can reasonably decide it is out of view and defer —
+          // which lands the download in the middle of its own entrance. Whether
+          // it does is a race with when the transform is applied, so pin it.
+          // Not `preload`: only the centre burger, the LCP element, gets a
+          // <link>, or the three compete for the same head budget.
+          loading="eager"
           className="h-auto w-full"
         />
       </div>
@@ -67,6 +73,27 @@ export function Hero({ play }: { play: boolean }) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const seq = useRef<FrameSequence | null>(null);
+
+  // The sequence outlives the entrance timeline, so it is built once on mount
+  // rather than inside the `play` effect. The download starts here — the intro
+  // owns the screen for ~3s and leaves the network idle — while the decoding
+  // waits for `play` below, so 40 decodes do not land on the intro's animation.
+  useEffect(() => {
+    const el = canvas.current;
+    const sec = root.current;
+    if (!el || !sec) return;
+    // Reduced motion skips the scroll timeline below, so the canvas never
+    // paints — no reason to pull 1.5MB of frames down for it.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const s = createFrameSequence(el, shownWidth(sec.clientWidth));
+    seq.current = s;
+    s?.fetchAll();
+    return () => {
+      s?.dispose();
+      seq.current = null;
+    };
+  }, []);
 
   // Park the burgers off-screen before first paint. They sit under the
   // intro overlay until `play` flips, so nothing is ever seen out of place.
@@ -182,8 +209,7 @@ export function Hero({ play }: { play: boolean }) {
         });
       });
 
-      const seq = canvas.current ? createFrameSequence(canvas.current) : null;
-      void seq?.load();
+      void seq.current?.decodeAll();
 
       // Where the burger has to travel to sit dead centre, at the size it
       // should be once it is the only thing on screen. Measured from layout
@@ -204,7 +230,7 @@ export function Hero({ play }: { play: boolean }) {
         const w = el.offsetWidth;
         const h = el.offsetHeight;
         if (!w || !h) return;
-        forward.scale = Math.min(sec.clientWidth * 0.98, 620) / w;
+        forward.scale = shownWidth(sec.clientWidth) / w;
         forward.x = sec.clientWidth / 2 - (x + w / 2);
         // 0.45, not 0.5: the CTA sits at the bottom of the section, and on a
         // tall viewport a dead-centred burger grows down into it.
@@ -293,21 +319,20 @@ export function Hero({ play }: { play: boolean }) {
       // Paint from one place, both directions. The photo stays on top until the
       // canvas can actually paint, so a slow connection degrades to a burger
       // that comes forward and simply does not separate — never to a blank box.
+      //
+      // The handover flips twice in the whole scroll, so it is held in a local
+      // rather than written every tick: `gsap.set` with selector text re-runs
+      // querySelectorAll, and this callback is on a scrub.
+      const photo = root.current?.querySelector<HTMLElement>(".burger-photo");
+      let hidden: boolean | null = null;
       scrollTl.eventCallback("onUpdate", () => {
         const separating = scrollTl.progress() >= SEPARATE_AT;
-        const painted = seq?.draw(separating ? playhead.frame : 0) ?? false;
-        gsap.set(".burger-photo", {
-          autoAlpha: painted && separating ? 0 : 1,
-        });
+        const painted = seq.current?.draw(separating ? playhead.frame : 0);
+        const hide = !!painted && separating;
+        if (hide === hidden || !photo) return;
+        hidden = hide;
+        gsap.set(photo, { autoAlpha: hide ? 0 : 1 });
       });
-
-      const onResize = () => seq?.resize();
-      window.addEventListener("resize", onResize);
-
-      return () => {
-        window.removeEventListener("resize", onResize);
-        seq?.dispose();
-      };
     },
     { scope: root, dependencies: [play] },
   );
@@ -440,7 +465,10 @@ export function Hero({ play }: { play: boolean }) {
                     src={signature}
                     alt="Signature burger with lettuce, tomato and melted cheddar"
                     sizes="(max-width: 560px) 100vw, 560px"
-                    priority
+                    // `priority` is deprecated as of Next 16. This is the LCP
+                    // element and it sits under the intro overlay, so it has to
+                    // start in <head> rather than wait to be discovered.
+                    preload
                     className="burger-photo absolute left-0"
                     style={{
                       top: `${POSTER_TOP}%`,

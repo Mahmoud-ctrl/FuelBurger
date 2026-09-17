@@ -227,15 +227,18 @@ export function IntroSequence({ onFinish }: { onFinish?: () => void }) {
         )
         .to(".fuel-drop", { autoAlpha: 0, duration: 0.2 }, THROW + 0.34)
 
-        // the mass lands and blankets the screen
-        .to(
-          liquid,
-          { p: 0.52, duration: 0.65, ease: "power3.out", onUpdate: draw },
-          THROW,
-        )
-        // the surface keeps moving as it arrives. Once the band covers the
-        // viewport both its edges are off-screen, so there is nothing left
-        // to animate — the timeline ends on a short beat of flat colour.
+        // The mass lands and blankets the screen, and its surface keeps moving
+        // as it arrives. Once the band covers the viewport both its edges are
+        // off-screen, so there is nothing left to animate — the timeline ends
+        // on a short beat of flat colour.
+        //
+        // Sweep and ripple have different eases, so they are separate tweens,
+        // but only one of them may carry `draw`: they run over the same window,
+        // and two onUpdates means building and parsing four full-screen path
+        // strings per frame to paint the same two. It goes on the ripple, the
+        // later of the two — children sharing a start time render in the order
+        // they were added, so by then both values are current for this tick.
+        .to(liquid, { p: 0.52, duration: 0.65, ease: "power3.out" }, THROW)
         .to(
           liquid,
           { phase: "+=0.9", duration: 0.65, ease: "none", onUpdate: draw },
