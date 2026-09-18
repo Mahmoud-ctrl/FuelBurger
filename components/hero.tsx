@@ -147,19 +147,6 @@ export function Hero({ play }: { play: boolean }) {
           },
           0.59,
         )
-        // the impact ripples up through its own layers
-        .to(
-          ".burger-centre [data-layer]",
-          {
-            y: -9,
-            duration: 0.13,
-            ease: "power2.out",
-            stagger: { each: 0.028, from: "end" },
-            yoyo: true,
-            repeat: 1,
-          },
-          0.53,
-        )
 
         // flanks sweep in to either side
         .to(
@@ -172,23 +159,6 @@ export function Hero({ play }: { play: boolean }) {
           { x: 0, rotate: 0, duration: 0.8, ease: "back.out(1.35)" },
           0.58,
         );
-
-      // Idle drift, once everyone has landed. Each layer on its own phase
-      // so the burgers read as assembled rather than printed.
-      tl.call(
-        () => {
-          gsap.to(".burger [data-float]", {
-            y: "+=7",
-            duration: 2.5,
-            ease: "sine.inOut",
-            repeat: -1,
-            yoyo: true,
-            stagger: { each: 0.14, from: "random" },
-          });
-        },
-        undefined,
-        1.35,
-      );
 
       // ---- scroll: the centre burger comes to the front, then comes apart ----
       //
@@ -372,6 +342,8 @@ export function Hero({ play }: { play: boolean }) {
       <div
         aria-hidden
         className="build-word pointer-events-none absolute inset-x-0 top-[8%] z-[1] flex justify-center px-2"
+        // Scaled by the scroll, so held on one raster like the burger.
+        style={{ willChange: "transform" }}
       >
         {/* Stretched vertically rather than scaled up: width is what is scarce
             here (7 letters across a phone), height is free. transform-origin is
@@ -449,7 +421,12 @@ export function Hero({ play }: { play: boolean }) {
                 reads as nearest: it is larger, it overlaps both flanks, and it
                 is not dimmed the way they are. */}
             <div className="burger burger-centre absolute left-[19%] top-[-5%] z-20 w-[62%]">
-              <div className="burger-inner">
+              {/* will-change keeps this on one raster while the scroll scales
+                  it 2x toward the viewer. Without it the browser re-rasterises
+                  the photo at every new scale, every frame: on a mid-range
+                  Android phone the zoom threw 60-160ms frames, and with it
+                  none over 50ms. Screenshots at full zoom show no softening. */}
+              <div className="burger-inner" style={{ willChange: "transform" }}>
                 <div
                   ref={stage}
                   className="relative overflow-hidden"
@@ -490,7 +467,7 @@ export function Hero({ play }: { play: boolean }) {
         {/* ---- actions ---- */}
         <div className="hero-actions mt-auto flex flex-col items-center gap-4 pt-8">
           <a
-            href="#menu"
+            href="#starters"
             className="w-full max-w-[20rem] rounded-full bg-fuel-gold px-8 py-4 text-center font-display text-[0.78rem] font-bold uppercase tracking-[0.2em] text-fuel-maroon"
           >
             See the menu
@@ -511,7 +488,7 @@ export function Hero({ play }: { play: boolean }) {
           Brioche · aged cheddar · smashed 80/20
         </p>
         <a
-          href="#menu"
+          href="#starters"
           className="pointer-events-auto rounded-full bg-fuel-gold px-9 py-4 font-display text-[0.75rem] font-bold uppercase tracking-[0.2em] text-fuel-maroon"
         >
           Order yours

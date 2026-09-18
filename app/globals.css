@@ -12,6 +12,7 @@
   --color-fuel-cream: #faf1de;
   --color-fuel-ink: #2a1410;
   --color-fuel-char: #3a0d12;
+  --color-fuel-jalapeno: #86b94a;
 }
 
 @theme inline {
@@ -41,16 +42,30 @@ html {
   --logo-cream: var(--color-fuel-maroon);
 }
 
-/* Fine grain so the flat red has some tooth. Cheap, and it keeps large
-   areas of one colour from looking like a swatch. */
+/* Fine grain so the flat red has some tooth, and large areas of one colour
+   do not look like a swatch.
+
+   No mix-blend-mode. An overlay blend makes the GPU render the whole section
+   into an offscreen pass and blend it back every frame anything under it
+   moves: 2-3 extra render passes per frame in every section, measured on a
+   mid-range Android phone. So the tile carries its own light and dark
+   specks (white where the noise is above mid-grey, black where it is below,
+   alpha growing with the distance) and composites normally.
+
+   Opacities are matched to what the overlay produced, measured as the
+   spread of the surface colour: about +/-1.5 levels on maroon. On cream the
+   overlay all but vanished (it barely moves near-white), so cream gets only
+   a trace. */
 .fuel-grain::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.12;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: var(--grain, 0.045);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' result='l' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 2 0 0 0 -1'/%3E%3CfeColorMatrix in='t' result='d' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2 0 0 0 1'/%3E%3CfeMerge%3E%3CfeMergeNode in='l'/%3E%3CfeMergeNode in='d'/%3E%3C/feMerge%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.bg-fuel-cream.fuel-grain {
+  --grain: 0.012;
 }
 
 body {
