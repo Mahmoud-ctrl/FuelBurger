@@ -185,6 +185,20 @@ export function About({ play }: { play: boolean }) {
           <FuelLogo className="h-auto w-full" aria-label="FUEL" />
           <FuelTagline className="mt-4" style={{ fontSize: "0.62rem" }} />
         </div>
+        {/* developed by section */}
+        <div className="mt-16 text-center">
+          <p className="font-display text-[0.875rem] leading-relaxed text-fuel-ink/65">
+            Developed by{" "}
+            <a
+              href="https://www.instagram.com/idevelopit_agency"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-fuel-maroon hover:underline"
+            >
+              iDevelopit
+            </a>
+          </p>
+        </div>
       </div>
     </section>
   );

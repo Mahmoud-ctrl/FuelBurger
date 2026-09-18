@@ -75,11 +75,14 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* Scroll lock applied while the intro overlay owns the screen. Locking
-   <body> alone does not stop iOS Safari rubber-banding — the scroll lives
-   on the document element, so both need it. */
+/* Scroll lock applied while the intro overlay or the menu owns the screen.
+   Locking <body> alone does not stop iOS Safari rubber-banding — the scroll
+   lives on the document element, so both need it. Separate attributes, so
+   the intro clearing its own never unlocks an open menu. */
 html[data-intro-locked="true"],
-html[data-intro-locked="true"] body {
+html[data-intro-locked="true"] body,
+html[data-nav-open="true"],
+html[data-nav-open="true"] body {
   overflow: hidden;
   touch-action: none;
 }

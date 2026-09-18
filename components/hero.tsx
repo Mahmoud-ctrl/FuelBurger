@@ -5,7 +5,10 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import NextImage, { type StaticImageData } from "next/image";
+import Link from "next/link";
+import { WHATSAPP_URL } from "./contact";
 import { FuelLogo } from "./fuel-logo";
+import { NAV_PANEL_ID, NAV_TOGGLE_ID } from "./nav-menu";
 import {
   createFrameSequence,
   EDGE_FADE,
@@ -69,7 +72,15 @@ function Photo({
   );
 }
 
-export function Hero({ play }: { play: boolean }) {
+export function Hero({
+  play,
+  navOpen,
+  onOpenNav,
+}: {
+  play: boolean;
+  navOpen: boolean;
+  onOpenNav: () => void;
+}) {
   const root = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -104,7 +115,10 @@ export function Hero({ play }: { play: boolean }) {
       gsap.set(".burger-left", { x: "-90vw", rotate: -22 });
       gsap.set(".burger-right", { x: "90vw", rotate: 22 });
       // Both belong to the scroll effect; nothing should see them at rest.
-      gsap.set([".build-word", ".build-cta"], { opacity: 0 });
+      // autoAlpha on the CTA, not just opacity: at rest it sits right over
+      // "See the menu", and a transparent link still takes the tap.
+      gsap.set(".build-word", { opacity: 0 });
+      gsap.set(".build-cta", { autoAlpha: 0 });
     },
     { scope: root, dependencies: [] },
   );
@@ -268,8 +282,8 @@ export function Hero({ play }: { play: boolean }) {
         )
         .fromTo(
           ".build-cta",
-          { opacity: 0, y: 22 },
-          { opacity: 1, y: 0, ease: "power2.out", duration: 0.22 },
+          { autoAlpha: 0, y: 22 },
+          { autoAlpha: 1, y: 0, ease: "power2.out", duration: 0.22 },
           0.14,
         )
 
@@ -361,9 +375,16 @@ export function Hero({ play }: { play: boolean }) {
         {/* ---- nav ---- */}
         <header className="flex items-center justify-between">
           <FuelLogo className="logo-on-maroon h-auto w-[92px]" />
+          {/* Disabled until the intro hands over: the intro lets clicks
+              through, and a menu opened under it would be invisible. */}
           <button
+            id={NAV_TOGGLE_ID}
             type="button"
             aria-label="Open menu"
+            aria-controls={NAV_PANEL_ID}
+            aria-expanded={navOpen}
+            disabled={!play}
+            onClick={onOpenNav}
             className="flex h-9 w-9 flex-col items-end justify-center gap-[5px]"
           >
             <span className="block h-px w-6 bg-fuel-cream/70" />
@@ -466,18 +487,12 @@ export function Hero({ play }: { play: boolean }) {
 
         {/* ---- actions ---- */}
         <div className="hero-actions mt-auto flex flex-col items-center gap-4 pt-8">
-          <a
-            href="#starters"
+          <Link
+            href="/menu"
             className="w-full max-w-[20rem] rounded-full bg-fuel-gold px-8 py-4 text-center font-display text-[0.78rem] font-bold uppercase tracking-[0.2em] text-fuel-maroon"
           >
             See the menu
-          </a>
-          <a
-            href="#find-us"
-            className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-fuel-cream/65 underline decoration-fuel-gold/50 underline-offset-[6px]"
-          >
-            Find the truck
-          </a>
+          </Link>
         </div>
       </div>
       {/* Comes back once the burger owns the screen — the hero's own copy and
@@ -488,7 +503,9 @@ export function Hero({ play }: { play: boolean }) {
           Brioche · aged cheddar · smashed 80/20
         </p>
         <a
-          href="#starters"
+          href={WHATSAPP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           className="pointer-events-auto rounded-full bg-fuel-gold px-9 py-4 font-display text-[0.75rem] font-bold uppercase tracking-[0.2em] text-fuel-maroon"
         >
           Order yours
