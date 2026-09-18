@@ -47,9 +47,9 @@ const BURGERS: Item[] = [
   },
   {
     name: "Loaded",
-    body: "Smashed beef, bacon and crispy onion rings.",
+    body: "Smashed beef, crispy onion rings.",
     image: loaded,
-    alt: "Bacon burger with crispy onion rings",
+    alt: "Burger with crispy onion rings",
     price: 10,
   },
 ];

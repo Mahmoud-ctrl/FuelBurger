@@ -425,7 +425,7 @@ export function Hero({
             <Photo
               className="burger-right left-[54%] top-[17%] z-10 w-[50%]"
               src={loaded}
-              alt="Bacon burger with crispy onion rings"
+              alt="Burger with crispy onion rings"
             />
             {/* The centre burger is the one that comes forward and comes
                 apart, so it is not a plain <Photo>: it is the frame box, with
