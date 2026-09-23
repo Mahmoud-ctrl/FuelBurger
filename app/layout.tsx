@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "FUEL — Recharge Your Stomach",
   description:
     "Smashed patties, buns toasted on the flat top, and absolutely no patience for bland.",
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {
