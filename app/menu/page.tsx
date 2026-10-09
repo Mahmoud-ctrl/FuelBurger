@@ -129,10 +129,12 @@ const HOT_DOGS: Item[] = [
   {
     name: "Classic Hot Dog",
     body: "Hot dog, ketchup, mayo and mustard.",
+    price: 4,
   },
   {
     name: "Fuel Signature Hot Dog",
     body: "Hot dog, cheddar sauce, BBQ sauce, pickles and chips.",
+    price: 5.5,
   },
 ];
 
