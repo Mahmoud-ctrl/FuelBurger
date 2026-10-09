@@ -1,84 +1,215 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import NextImage, { type StaticImageData } from "next/image";
 import { FuelLogo, FuelTagline } from "@/components/fuel-logo";
-import classic from "@/public/burgers/classic.webp";
-import signature from "@/public/burgers/signature.webp";
-import loaded from "@/public/burgers/loaded.webp";
-import bowlClassic from "@/public/starters/bowl-classic.webp";
-import bowlJalapeno from "@/public/starters/bowl-jalapeno.webp";
 
 export const metadata: Metadata = {
   title: "Menu — FUEL",
   description:
-    "Three smashed builds, two cheese bombs and fries that are fried twice.",
+    "Chicken, Nashville and smashed beef burgers, loaded fries, crispy, wings and hot dogs.",
 };
 
 type Item = {
   name: string;
   body: string;
-  image: StaticImageData;
-  alt: string;
-  /** In US dollars. */
-  price: number;
-  /** Small line under the description, e.g. the heat. */
-  note?: string;
+  /** In US dollars. Left out where the price isn't set yet. */
+  price?: number;
+  /** One pick the guest makes, e.g. the sauce the tenders are dipped in. */
+  choice?: { label: string; options: string[] };
+  /** Same dish by the piece, each size with its own price. */
+  sizes?: Size[];
+  /**
+   * The client's own photo, once it's shot. Until then the row shows a
+   * placeholder tile, so adding a photo is this one field.
+   */
+  photo?: { src: StaticImageData; alt: string };
 };
 
-/** Whole dollars, so no cents: 9 -> "$9". */
-const usd = (n: number) => `$${n}`;
+type Size = { pieces: number; price: number; note?: string };
 
-/* Copy is the home page's, so the two never disagree. */
-const BURGERS: Item[] = [
+/** Whole dollars stay whole, the rest get cents: 6 -> "$6", 6.5 -> "$6.50". */
+const usd = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
+
+const TENDER_SAUCES = ["BBQ", "Buffalo", "Honey Mustard", "Sweet Chili"];
+
+const CHICKEN: Item[] = [
   {
-    name: "Classic",
-    body: "Double cheeseburger with lettuce and tomato.",
-    image: classic,
-    alt: "Double cheeseburger with lettuce and tomato",
-    price: 9,
+    name: "Crunchy Zinger",
+    body: "Fried chicken breast, smoked turkey, BBQ, cheddar, cocktail sauce, iceberg, pickles and nachos.",
+    price: 6,
   },
   {
-    name: "Signature",
-    body: "Brioche, aged cheddar and smashed 80/20 beef, with lettuce and tomato.",
-    image: signature,
-    alt: "Signature burger with lettuce, tomato and melted cheddar",
-    price: 11,
+    name: "Escalop Burger",
+    body: "Chicken, garlic sauce, coleslaw, french fries and pickles.",
+    price: 5,
   },
   {
-    name: "Loaded",
-    body: "Smashed beef, crispy onion rings.",
-    image: loaded,
-    alt: "Burger with crispy onion rings",
-    price: 10,
+    name: "Sweet Chili Burger",
+    body: "Fried chicken breast dipped in sweet chili, ranch, two jalapeño bites, chips and pickles.",
+    price: 6.5,
+  },
+  {
+    name: "BBQ Bomb",
+    body: "Fried chicken breast dipped in BBQ, a mozzarella patty, chips, iceberg, pickles and special sauce.",
+    price: 6.5,
+  },
+  {
+    name: "Fuel Burger",
+    body: "Double fried chicken breast, pickles, mighty sauce, mayo pepper sauce, iceberg and cheddar.",
+    price: 6.5,
+  },
+  {
+    name: "Octane 95",
+    body: "Fried chicken breast dipped in honey mustard, a mozzarella patty, chips, iceberg, pickles and special sauce.",
+    price: 7,
   },
 ];
 
-const STARTERS: Item[] = [
+const NASHVILLE: Item[] = [
   {
-    name: "Cheese Bombs",
-    body: "Mozzarella packed in a seasoned crumb and fried until it shatters. Pull slow.",
-    image: bowlClassic,
-    alt: "A bowl of crumb-fried mozzarella cheese balls, one pulled open",
-    price: 7,
-    note: "No heat",
+    name: "Nashville Burger",
+    body: "Nashville fried chicken breast, coleslaw, dill pickles, fuel sauce and Nashville sauce.",
+    price: 6.5,
   },
   {
-    name: "Jalapeño Bombs",
-    body: "Same molten middle, loaded with fresh-cut jalapeño. Brings a kick, not a fire.",
-    image: bowlJalapeno,
-    alt: "A bowl of jalapeño cheese balls topped with fresh jalapeño slices",
-    price: 7,
-    note: "Medium kick",
+    name: "Hot Nashville Burger",
+    body: "Nashville fried chicken breast with hot spices, coleslaw, honey, dill pickles, fuel sauce and Nashville sauce.",
+    price: 6.5,
   },
 ];
 
-const FRIES_PRICE = 4;
+const BEEF: Item[] = [
+  {
+    name: "Lebanese Burger",
+    body: "130g beef patty, mayo salad, fries, pickles and ketchup.",
+    price: 5,
+  },
+  {
+    name: "Double Smash Burger",
+    body: "150g of smashed beef patties, two slices of cheddar, iceberg, smash sauce, caramelized onion and pickles.",
+    price: 6.5,
+  },
+  {
+    name: "Mushroom Burger",
+    body: "Beef patty, mushroom sauce, swiss cheese and special sauce.",
+    price: 7.5,
+  },
+  {
+    name: "Octane 98",
+    body: "Three smashed beef patties, sweet jalapeños, bacon, fried onion, smash sauce and three slices of cheddar.",
+    price: 8.5,
+  },
+];
+
+const LOADED: Item[] = [
+  {
+    name: "Honey Loaded",
+    body: "French fries, jalapeños and tenders dipped in honey mustard.",
+    price: 5.5,
+  },
+  {
+    name: "BBQ Loaded",
+    body: "French fries, jalapeños and tenders dipped in BBQ.",
+    price: 5.5,
+  },
+  {
+    name: "Buffalo Loaded",
+    body: "French fries, jalapeños and tenders dipped in buffalo.",
+    price: 5.5,
+  },
+  {
+    name: "Mac Attack",
+    body: "Fries, mac and cheese, Nashville tenders and special sauce.",
+    price: 5.5,
+  },
+];
+
+const HOT_DOGS: Item[] = [
+  {
+    name: "Classic Hot Dog",
+    body: "Hot dog, ketchup, mayo and mustard.",
+  },
+  {
+    name: "Fuel Signature Hot Dog",
+    body: "Hot dog, cheddar sauce, BBQ sauce, pickles and chips.",
+  },
+];
+
+const CRISPY: Item[] = [
+  {
+    name: "Crispy",
+    body: "Served with french fries, coleslaw, garlic sauce and cocktail sauce.",
+    sizes: [
+      { pieces: 3, price: 7 },
+      { pieces: 5, price: 9 },
+      { pieces: 7, price: 12 },
+      { pieces: 10, price: 14 },
+    ],
+  },
+];
+
+const WINGS: Item[] = [
+  {
+    name: "Wings",
+    body: "Tossed in one sauce of your choice.",
+    choice: { label: "Pick one sauce", options: TENDER_SAUCES },
+    sizes: [
+      { pieces: 6, price: 3, note: "Half portion" },
+      { pieces: 12, price: 5.5 },
+    ],
+  },
+];
+
+const APPETIZERS: Item[] = [
+  {
+    name: "French Fries",
+    body: "A pack of fries.",
+    price: 2,
+  },
+  {
+    name: "Mozzarella Sticks",
+    body: "Four sticks, served with cocktail sauce.",
+    price: 4,
+  },
+  {
+    name: "Jalapeño Bites",
+    body: "Four bites.",
+    price: 4,
+  },
+  {
+    name: "Tenders",
+    body: "Four tenders, dipped in one sauce of your choice.",
+    price: 5,
+    choice: { label: "Pick one sauce", options: TENDER_SAUCES },
+  },
+];
+
+const DIPS = [
+  "BBQ",
+  "Mighty Sauce",
+  "Honey Mustard",
+  "Cheddar",
+  "Cocktail",
+  "Fuel Sauce",
+  "Ranch",
+  "Sweet Chili",
+];
+const DIP_PRICE = 0.35;
+
+const DRINKS_PRICE = 1;
 
 const SECTIONS = [
-  { id: "burgers", label: "Burgers" },
-  { id: "starters", label: "Starters" },
-  { id: "fries", label: "Fries" },
+  { id: "chicken", label: "Chicken" },
+  { id: "nashville", label: "Nashville" },
+  { id: "beef", label: "Beef" },
+  { id: "loaded", label: "Loaded" },
+  { id: "hot-dogs", label: "Hot dogs" },
+  { id: "crispy", label: "Crispy" },
+  { id: "wings", label: "Wings" },
+  { id: "appetizers", label: "Appetizers" },
+  { id: "dips", label: "Dips" },
+  { id: "drinks", label: "Drinks" },
 ];
 
 function Eyebrow({ id, children }: { id: string; children: string }) {
@@ -95,12 +226,93 @@ function Eyebrow({ id, children }: { id: string; children: string }) {
   );
 }
 
+/** A line under the eyebrow, for anything the whole section shares. */
+function SectionNote({ children }: { children: string }) {
+  return (
+    <p className="mt-3 max-w-[22rem] text-[0.88rem] leading-relaxed text-fuel-ink/65">
+      {children}
+    </p>
+  );
+}
+
+function Section({
+  id,
+  title,
+  first = false,
+  children,
+}: {
+  id: string;
+  title: string;
+  first?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className={`scroll-mt-6 ${first ? "" : "mt-14"}`}
+    >
+      <Eyebrow id={`${id}-title`}>{title}</Eyebrow>
+      {children}
+    </section>
+  );
+}
+
+/** Small pill, for sauce picks and dips. */
+function Tag({ children }: { children: string }) {
+  return (
+    <li className="rounded-full border border-fuel-maroon/25 px-3 py-1.5 font-display text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-fuel-maroon">
+      {children}
+    </li>
+  );
+}
+
+function Tags({ items, label }: { items: string[]; label?: string }) {
+  return (
+    <div className="mt-3">
+      {label && (
+        <p className="font-display text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-fuel-ink/60">
+          {label}
+        </p>
+      )}
+      <ul className={`flex flex-wrap gap-1.5 ${label ? "mt-2" : ""}`}>
+        {items.map((t) => (
+          <Tag key={t}>{t}</Tag>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /**
- * `eager` for the list that sits above the fold: its first photo is the LCP,
- * so only that one loads eagerly (and gets React's preload link). The rest
- * are lazy, but near enough the viewport that they start straight away.
+ * Stands in for the photo until the client's are shot: the dish's initial on
+ * the brand maroon. Plain type, no image, so it costs nothing to load.
  */
-function Items({ items, eager = false }: { items: Item[]; eager?: boolean }) {
+function PhotoTile({ item }: { item: Item }) {
+  return (
+    <div className="relative aspect-square w-[26%] max-w-[7.5rem] shrink-0 self-start">
+      {item.photo ? (
+        <NextImage
+          src={item.photo.src}
+          alt={item.photo.alt}
+          sizes="(max-width: 520px) 26vw, 120px"
+          className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_10px_12px_rgba(42,20,16,.22)]"
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="fuel-grain absolute inset-0 isolate flex items-center justify-center overflow-hidden rounded-[18px] bg-fuel-maroon"
+        >
+          <span className="font-display text-[clamp(2rem,9vw,2.9rem)] font-black leading-none text-fuel-gold">
+            {item.name[0]}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Items({ items }: { items: Item[] }) {
   return (
     <ol className="mt-6 border-t border-fuel-ink/10">
       {items.map((item, i) => (
@@ -108,39 +320,54 @@ function Items({ items, eager = false }: { items: Item[]; eager?: boolean }) {
           key={item.name}
           className="flex items-center gap-5 border-b border-fuel-ink/10 py-5"
         >
-          <div className="relative aspect-square w-[34%] max-w-[9.5rem] shrink-0">
-            <NextImage
-              src={item.image}
-              alt={item.alt}
-              sizes="(max-width: 520px) 34vw, 152px"
-              loading={eager && i === 0 ? "eager" : "lazy"}
-              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_10px_12px_rgba(42,20,16,.22)]"
-            />
-          </div>
+          <PhotoTile item={item} />
           <div className="min-w-0 flex-1">
             <p className="font-display text-[0.62rem] font-bold tracking-[0.2em] text-fuel-maroon">
               {String(i + 1).padStart(2, "0")}
             </p>
             <div className="mt-1 flex items-baseline justify-between gap-3">
-              <h3 className="min-w-0 font-display text-[1.35rem] font-bold leading-tight text-fuel-ink">
+              <h3 className="min-w-0 font-display text-[1.2rem] font-bold leading-tight text-fuel-ink">
                 {item.name}
               </h3>
-              <p className="shrink-0 font-display text-[1.2rem] font-bold text-fuel-maroon">
-                {usd(item.price)}
-              </p>
+              {item.price !== undefined && (
+                <p className="shrink-0 font-display text-[1.1rem] font-bold text-fuel-maroon">
+                  {usd(item.price)}
+                </p>
+              )}
             </div>
-            <p className="mt-2 text-[0.88rem] leading-relaxed text-fuel-ink/65">
+            <p className="mt-2 text-[0.85rem] leading-relaxed text-fuel-ink/65">
               {item.body}
             </p>
-            {item.note && (
-              <p className="mt-3 font-display text-[0.6rem] font-semibold uppercase tracking-[0.22em] text-fuel-ink/60">
-                {item.note}
-              </p>
+            {item.choice && (
+              <Tags label={item.choice.label} items={item.choice.options} />
             )}
+            {item.sizes && <Sizes sizes={item.sizes} />}
           </div>
         </li>
       ))}
     </ol>
+  );
+}
+
+/** One line per size, priced like the rows themselves. */
+function Sizes({ sizes }: { sizes: Size[] }) {
+  return (
+    <ul className="mt-3 border-t border-dashed border-fuel-ink/15">
+      {sizes.map((s) => (
+        <li
+          key={s.pieces}
+          className="flex items-baseline justify-between gap-3 border-b border-dashed border-fuel-ink/15 py-2"
+        >
+          <span className="font-display text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-fuel-ink/70">
+            {s.pieces} pcs
+            {s.note && <span className="text-fuel-ink/45"> · {s.note}</span>}
+          </span>
+          <span className="shrink-0 font-display text-[0.95rem] font-bold text-fuel-maroon">
+            {usd(s.price)}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -169,22 +396,27 @@ export default function MenuPage() {
           <div className="mt-9 flex items-center gap-3">
             <span className="block h-px w-8 bg-fuel-gold" />
             <span className="font-display text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-fuel-gold">
-              Smashed to order
+              Made to order
             </span>
           </div>
           <h1 className="mt-4 font-display text-[2.9rem] font-bold leading-[0.95] tracking-[-0.02em] text-fuel-cream">
             The <span className="text-fuel-gold">menu.</span>
           </h1>
           <p className="mt-4 max-w-[18rem] text-[0.92rem] leading-relaxed text-fuel-cream/60">
-            One flat top, three builds, and absolutely no patience for bland.
+            Crunchy chicken, smashed beef, and absolutely no patience for bland.
           </p>
 
-          <nav aria-label="Menu sections" className="mt-8 flex flex-wrap gap-2">
+          {/* One swipeable row instead of four wrapped ones. It runs to the
+              screen edges so the cut-off pill shows there is more. */}
+          <nav
+            aria-label="Menu sections"
+            className="-mx-5 mt-8 flex gap-2 overflow-x-auto overscroll-x-contain px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {SECTIONS.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="rounded-full border border-fuel-gold/40 px-4 py-2.5 font-display text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-fuel-cream/80"
+                className="shrink-0 whitespace-nowrap rounded-full border border-fuel-gold/40 px-4 py-2.5 font-display text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-fuel-cream/80"
               >
                 {s.label}
               </a>
@@ -196,37 +428,63 @@ export default function MenuPage() {
       {/* The same cream sheet over maroon as the home page's sections. */}
       <div className="fuel-grain relative isolate z-10 -mt-7 flex-1 overflow-hidden rounded-t-[28px] bg-fuel-cream pb-16 pt-14">
         <div className="mx-auto w-full max-w-[520px] px-5">
-          <section id="burgers" aria-labelledby="burgers-title" className="scroll-mt-6">
-            <Eyebrow id="burgers-title">Burgers</Eyebrow>
-            <Items items={BURGERS} eager />
-          </section>
+          <Section id="chicken" title="Chicken burgers" first>
+            <Items items={CHICKEN} />
+          </Section>
 
-          <section
-            id="starters"
-            aria-labelledby="starters-title"
-            className="mt-14 scroll-mt-6"
-          >
-            <Eyebrow id="starters-title">Starters</Eyebrow>
-            <Items items={STARTERS} />
-          </section>
+          <Section id="nashville" title="Nashville burgers">
+            <Items items={NASHVILLE} />
+          </Section>
 
-          <section
-            id="fries"
-            aria-labelledby="fries-title"
-            className="mt-14 scroll-mt-6"
-          >
-            <Eyebrow id="fries-title">Fries</Eyebrow>
-            <div className="fuel-grain relative isolate mt-6 overflow-hidden rounded-[22px] bg-fuel-maroon px-6 py-8">
-              <p className="font-display text-[1.9rem] font-bold leading-[0.95] tracking-[-0.02em] text-fuel-cream">
-                Twice-fried.
-                <br />
-                Never <span className="text-fuel-gold">limp.</span>
+          <Section id="beef" title="Beef burgers">
+            <Items items={BEEF} />
+          </Section>
+
+          <Section id="loaded" title="Loaded">
+            <SectionNote>
+              Every Loaded box comes with your choice of dipping sauce.
+            </SectionNote>
+            <Items items={LOADED} />
+          </Section>
+
+          <Section id="hot-dogs" title="Hot dogs">
+            <Items items={HOT_DOGS} />
+          </Section>
+
+          <Section id="crispy" title="Crispy">
+            <Items items={CRISPY} />
+          </Section>
+
+          <Section id="wings" title="Wings">
+            <Items items={WINGS} />
+          </Section>
+
+          <Section id="appetizers" title="Appetizers">
+            <Items items={APPETIZERS} />
+          </Section>
+
+          <Section id="dips" title="Dips">
+            <div className="mt-6 flex items-baseline justify-between gap-3 border-t border-fuel-ink/10 pt-5">
+              <p className="font-display text-[1.2rem] font-bold leading-tight text-fuel-ink">
+                Cup of sauce
               </p>
-              <p className="mt-3 max-w-[17rem] text-[0.92rem] leading-relaxed text-fuel-cream/65">
-                Hand-cut, fried twice, and salted the second they leave the oil.
+              <p className="shrink-0 font-display text-[1.1rem] font-bold text-fuel-maroon">
+                {usd(DIP_PRICE)}
               </p>
             </div>
-          </section>
+            <Tags items={DIPS} />
+          </Section>
+
+          <Section id="drinks" title="Drinks">
+            <div className="mt-6 flex items-baseline justify-between gap-3 border-y border-fuel-ink/10 py-5">
+              <p className="font-display text-[1.2rem] font-bold leading-tight text-fuel-ink">
+                Soft drinks
+              </p>
+              <p className="shrink-0 font-display text-[1.1rem] font-bold text-fuel-maroon">
+                {usd(DRINKS_PRICE)}
+              </p>
+            </div>
+          </Section>
 
           {/* Sign-off, as on the home page. The mark's cut-outs take the
               surface colour so they still read as holes on cream. */}
