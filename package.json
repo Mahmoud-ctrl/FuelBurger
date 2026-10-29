@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "build:frames": "node scripts/build-frames.mjs"
+    "build:frames": "node scripts/build-frames.mjs",
+    "export:board": "node scripts/export-menu-board.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

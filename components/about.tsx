@@ -4,6 +4,7 @@ import { type CSSProperties, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { PHONE, PHONE_URL } from "./contact";
 import { FuelLogo, FuelTagline } from "./fuel-logo";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -187,6 +188,12 @@ export function About({ play }: { play: boolean }) {
         </div>
         {/* developed by section */}
         <div className="mt-16 text-center">
+          <p className="mb-3 font-display text-[0.875rem] leading-relaxed text-fuel-ink/65">
+            Call us{" "}
+            <a href={PHONE_URL} className="font-bold text-fuel-maroon hover:underline">
+              {PHONE}
+            </a>
+          </p>
           <p className="font-display text-[0.875rem] leading-relaxed text-fuel-ink/65">
             Developed by{" "}
             <a

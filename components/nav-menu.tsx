@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { INSTAGRAM_URL, WHATSAPP_URL } from "./contact";
+import { INSTAGRAM_URL, PHONE, PHONE_URL, WHATSAPP_URL } from "./contact";
 import { FuelLogo } from "./fuel-logo";
 
 /** The hero's menu button, so focus can go back to it on close. */
@@ -191,7 +191,17 @@ export function NavMenu({
           </ol>
         </nav>
 
-        <p className="mt-auto pt-12 font-display text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-fuel-gold">
+        <a
+          href={PHONE_URL}
+          onClick={leave}
+          className="mt-auto block pt-12 font-display text-[1.1rem] font-bold text-fuel-cream"
+        >
+          <span className="mr-3 text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-fuel-gold">
+            Call
+          </span>
+          {PHONE}
+        </a>
+        <p className="mt-4 font-display text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-fuel-gold">
           Smashed to order
         </p>
       </div>

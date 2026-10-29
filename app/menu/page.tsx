@@ -1,205 +1,33 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import NextImage, { type StaticImageData } from "next/image";
+import NextImage from "next/image";
+import { PHONE, PHONE_URL } from "@/components/contact";
 import { FuelLogo, FuelTagline } from "@/components/fuel-logo";
+import {
+  APPETIZERS,
+  BEEF,
+  CHICKEN,
+  CRISPY,
+  DIP_PRICE,
+  DIPS,
+  DRINKS_PRICE,
+  EXTRA_PRICE,
+  HOT_DOGS,
+  type Item,
+  LOADED,
+  LOADED_NOTE,
+  NASHVILLE,
+  type Size,
+  usd,
+  WINGS,
+} from "@/components/menu-data";
 
 export const metadata: Metadata = {
   title: "Menu — FUEL",
   description:
     "Chicken, Nashville and smashed beef burgers, loaded fries, crispy, wings and hot dogs.",
 };
-
-type Item = {
-  name: string;
-  body: string;
-  /** In US dollars. Left out where the price isn't set yet. */
-  price?: number;
-  /** One pick the guest makes, e.g. the sauce the tenders are dipped in. */
-  choice?: { label: string; options: string[] };
-  /** Same dish by the piece, each size with its own price. */
-  sizes?: Size[];
-  /**
-   * The client's own photo, once it's shot. Until then the row shows a
-   * placeholder tile, so adding a photo is this one field.
-   */
-  photo?: { src: StaticImageData; alt: string };
-};
-
-type Size = { pieces: number; price: number; note?: string };
-
-/** Whole dollars stay whole, the rest get cents: 6 -> "$6", 6.5 -> "$6.50". */
-const usd = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
-
-const TENDER_SAUCES = ["BBQ", "Buffalo", "Honey Mustard", "Sweet Chili"];
-
-const CHICKEN: Item[] = [
-  {
-    name: "Crunchy Zinger",
-    body: "Fried chicken breast, smoked turkey, BBQ, cheddar, cocktail sauce, iceberg, pickles and nachos.",
-    price: 6,
-  },
-  {
-    name: "Escalop Burger",
-    body: "Chicken, garlic sauce, coleslaw, french fries and pickles.",
-    price: 5,
-  },
-  {
-    name: "Sweet Chili Burger",
-    body: "Fried chicken breast dipped in sweet chili, ranch, two jalapeño bites, chips and pickles.",
-    price: 6.5,
-  },
-  {
-    name: "BBQ Bomb",
-    body: "Fried chicken breast dipped in BBQ, a mozzarella patty, chips, iceberg, pickles and special sauce.",
-    price: 6.5,
-  },
-  {
-    name: "Fuel Burger",
-    body: "Double fried chicken breast, pickles, mighty sauce, mayo pepper sauce, iceberg and cheddar.",
-    price: 6.5,
-  },
-  {
-    name: "Octane 95",
-    body: "Fried chicken breast dipped in honey mustard, a mozzarella patty, chips, iceberg, pickles and special sauce.",
-    price: 7,
-  },
-];
-
-const NASHVILLE: Item[] = [
-  {
-    name: "Nashville Burger",
-    body: "Nashville fried chicken breast, coleslaw, dill pickles, fuel sauce and Nashville sauce.",
-    price: 6.5,
-  },
-  {
-    name: "Hot Nashville Burger",
-    body: "Nashville fried chicken breast with hot spices, coleslaw, honey, dill pickles, fuel sauce and Nashville sauce.",
-    price: 6.5,
-  },
-];
-
-const BEEF: Item[] = [
-  {
-    name: "Lebanese Burger",
-    body: "130g beef patty, mayo salad, fries, pickles and ketchup.",
-    price: 5,
-  },
-  {
-    name: "Double Smash Burger",
-    body: "150g of smashed beef patties, two slices of cheddar, iceberg, smash sauce, caramelized onion and pickles.",
-    price: 6.5,
-  },
-  {
-    name: "Mushroom Burger",
-    body: "Beef patty, mushroom sauce, swiss cheese and special sauce.",
-    price: 7.5,
-  },
-  {
-    name: "Octane 98",
-    body: "Three smashed beef patties, sweet jalapeños, bacon, fried onion, smash sauce and three slices of cheddar.",
-    price: 8.5,
-  },
-];
-
-const LOADED: Item[] = [
-  {
-    name: "Honey Loaded",
-    body: "French fries, jalapeños and tenders dipped in honey mustard.",
-    price: 5.5,
-  },
-  {
-    name: "BBQ Loaded",
-    body: "French fries, jalapeños and tenders dipped in BBQ.",
-    price: 5.5,
-  },
-  {
-    name: "Buffalo Loaded",
-    body: "French fries, jalapeños and tenders dipped in buffalo.",
-    price: 5.5,
-  },
-  {
-    name: "Mac Attack",
-    body: "Fries, mac and cheese, Nashville tenders and special sauce.",
-    price: 5.5,
-  },
-];
-
-const HOT_DOGS: Item[] = [
-  {
-    name: "Classic Hot Dog",
-    body: "Hot dog, ketchup, mayo and mustard.",
-    price: 4,
-  },
-  {
-    name: "Fuel Signature Hot Dog",
-    body: "Hot dog, cheddar sauce, BBQ sauce, pickles and chips.",
-    price: 5.5,
-  },
-];
-
-const CRISPY: Item[] = [
-  {
-    name: "Crispy",
-    body: "Served with french fries, coleslaw, garlic sauce and cocktail sauce.",
-    sizes: [
-      { pieces: 3, price: 7 },
-      { pieces: 5, price: 9 },
-      { pieces: 7, price: 12 },
-      { pieces: 10, price: 14 },
-    ],
-  },
-];
-
-const WINGS: Item[] = [
-  {
-    name: "Wings",
-    body: "Tossed in one sauce of your choice.",
-    choice: { label: "Pick one sauce", options: TENDER_SAUCES },
-    sizes: [
-      { pieces: 6, price: 3, note: "Half portion" },
-      { pieces: 12, price: 5.5 },
-    ],
-  },
-];
-
-const APPETIZERS: Item[] = [
-  {
-    name: "French Fries",
-    body: "A pack of fries.",
-    price: 2,
-  },
-  {
-    name: "Mozzarella Sticks",
-    body: "Four sticks, served with cocktail sauce.",
-    price: 4,
-  },
-  {
-    name: "Jalapeño Bites",
-    body: "Four bites.",
-    price: 4,
-  },
-  {
-    name: "Tenders",
-    body: "Four tenders, dipped in one sauce of your choice.",
-    price: 5,
-    choice: { label: "Pick one sauce", options: TENDER_SAUCES },
-  },
-];
-
-const DIPS = [
-  "BBQ",
-  "Mighty Sauce",
-  "Honey Mustard",
-  "Cheddar",
-  "Cocktail",
-  "Fuel Sauce",
-  "Ranch",
-  "Sweet Chili",
-];
-const DIP_PRICE = 0.35;
-
-const DRINKS_PRICE = 1;
 
 const SECTIONS = [
   { id: "chicken", label: "Chicken" },
@@ -211,6 +39,7 @@ const SECTIONS = [
   { id: "wings", label: "Wings" },
   { id: "appetizers", label: "Appetizers" },
   { id: "dips", label: "Dips" },
+  { id: "extras", label: "Extras" },
   { id: "drinks", label: "Drinks" },
 ];
 
@@ -443,9 +272,7 @@ export default function MenuPage() {
           </Section>
 
           <Section id="loaded" title="Loaded">
-            <SectionNote>
-              Every Loaded box comes with your choice of dipping sauce.
-            </SectionNote>
+            <SectionNote>{LOADED_NOTE}</SectionNote>
             <Items items={LOADED} />
           </Section>
 
@@ -477,6 +304,17 @@ export default function MenuPage() {
             <Tags items={DIPS} />
           </Section>
 
+          <Section id="extras" title="Extras">
+            <div className="mt-6 flex items-baseline justify-between gap-3 border-t border-fuel-ink/10 pt-5">
+              <p className="font-display text-[1.2rem] font-bold leading-tight text-fuel-ink">
+                Anything extra
+              </p>
+              <p className="shrink-0 font-display text-[1.1rem] font-bold text-fuel-maroon">
+                {usd(EXTRA_PRICE)}
+              </p>
+            </div>
+          </Section>
+
           <Section id="drinks" title="Drinks">
             <div className="mt-6 flex items-baseline justify-between gap-3 border-y border-fuel-ink/10 py-5">
               <p className="font-display text-[1.2rem] font-bold leading-tight text-fuel-ink">
@@ -499,6 +337,12 @@ export default function MenuPage() {
             </Link>
             <FuelTagline className="mt-4" style={{ fontSize: "0.62rem" }} />
           </div>
+          <p className="mt-10 text-center font-display text-[0.875rem] leading-relaxed text-fuel-ink/65">
+            Call us{" "}
+            <a href={PHONE_URL} className="font-bold text-fuel-maroon hover:underline">
+              {PHONE}
+            </a>
+          </p>
         </div>
       </div>
     </main>

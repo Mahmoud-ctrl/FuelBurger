@@ -8,3 +8,7 @@ const INSTAGRAM_HANDLE = "";
 /** Where orders go: the hero's "Order yours" and the menu's WhatsApp link. */
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 export const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}`;
+
+/** As printed, the local way. The link adds Lebanon's +961. */
+export const PHONE = "81 861 997";
+export const PHONE_URL = `tel:+961${PHONE.replace(/ /g, "")}`;
