@@ -208,7 +208,7 @@ export const APPETIZERS: Item[] = [
     name: "Shrimp",
     count: 10,
     body: "Ten pieces.",
-    price: 8,
+    price: 8.5,
   },
 ];
 
